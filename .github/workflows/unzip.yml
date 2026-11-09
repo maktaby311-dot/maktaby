@@ -22,7 +22,7 @@ jobs:
         run: |
           set -eu
 
-          ZIP="maktaby1-ux-branch.zip"
+          ZIP="maktaby-test-main.zip"
 
           test -f "$ZIP" || {
             echo "ERROR: ZIP file not found"
