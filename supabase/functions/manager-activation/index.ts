@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { sendBrevoOtpEmail } from '../_shared/brevo.ts';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -67,7 +68,7 @@ async function gmailAccessToken() {
   if (typeof result.access_token !== 'string' || !result.access_token) throw new Error('activation_delivery_failed');
   return result.access_token as string;
 }
-async function sendEmail(to: string, code: string) {
+async function sendGmailEmail(to: string, code: string) {
   const from = env('ACTIVATION_GMAIL_FROM');
   if (!from || /[\r\n]/.test(from) || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(from)) {
     throw new Error('activation_provider_not_configured');
@@ -93,6 +94,23 @@ async function sendEmail(to: string, code: string) {
     signal: AbortSignal.timeout(15_000),
   });
   if (!response.ok) throw new Error('activation_delivery_failed');
+}
+async function sendEmail(to: string, code: string) {
+  const provider = env('ACTIVATION_EMAIL_PROVIDER').toLowerCase() || 'gmail';
+  if (provider === 'gmail') return await sendGmailEmail(to, code);
+  if (provider !== 'brevo') throw new Error('activation_provider_not_configured');
+  try {
+    await sendBrevoOtpEmail({
+      apiKey: env('ACTIVATION_BREVO_API_KEY'),
+      senderEmail: env('ACTIVATION_BREVO_FROM'),
+      senderName: env('ACTIVATION_BREVO_SENDER_NAME') || 'مكتبي الإلكتروني',
+      to,
+      code,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message === 'activation_provider_not_configured') throw error;
+    throw new Error('activation_delivery_failed');
+  }
 }
 async function sendWhatsApp(to: string, code: string) {
   const token = env('ACTIVATION_META_ACCESS_TOKEN');
