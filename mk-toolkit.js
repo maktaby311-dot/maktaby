@@ -12,7 +12,7 @@
   /* v: ok = موثّق من مصادر منشورة (موقع المحكمة نفسه أو أخبار تنقل الرابط الرسمي)، sec = مصدر ثانوي؛ بدون رابط = غير مؤكد فعُطّل
      آخر مراجعة للروابط: 3 نوفمبر 2026 */
   const PLATFORMS = [
-    { name: 'وزارة العدل المصرية', desc: 'الموقع الرسمي للوزارة وخدماتها الإلكترونية', category: 'ministry', link: 'https://moj.gov.eg/ar/Pages/Home.aspx', v: 'ok' },
+    { name: 'وزارة العدل المصرية', desc: 'الاستعلام عن موقف دعوي', category: 'ministry', link: 'https://moj.gov.eg/services/courts/10050004', v: 'ok' },
     { name: 'الاستعلام عن رول الجلسات والدعاوى', desc: 'استعلام عن رول جلسة، رول دعوى، موقف دعوى، ووجود استئناف من عدمه (وزارة العدل)', category: 'service', link: 'https://moj.gov.eg/ar/Pages/Services/ServicesCatalog.aspx?UserCategory=4', v: 'ok' },
     { name: 'محكمة النقض المصرية', desc: 'الموقع الرسمي: المبادئ المدنية والجنائية والبحث المتقدم في أحكام النقض', category: 'cassation', link: 'https://cc.gov.eg', v: 'ok' },
     { name: 'النيابة العامة', desc: 'الموقع الرسمي: خدمات إلكترونية للمحامين (حساب، استعلام، طلبات) والعرائض', category: 'ministry', badge: 'النيابة', link: 'https://www.ppo.gov.eg', v: 'ok' },
