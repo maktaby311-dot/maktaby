@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { sendBrevoOtpEmail } from '../_shared/brevo.ts';
+import { sendMsg91Otp } from '../_shared/msg91.ts';
 
 const cors = {
   'Access-Control-Allow-Origin': '*',
@@ -112,6 +113,19 @@ async function sendEmail(to: string, code: string) {
     throw new Error('activation_delivery_failed');
   }
 }
+async function sendSms(to: string, code: string) {
+  try {
+    await sendMsg91Otp({
+      authKey: env('ACTIVATION_MSG91_AUTH_KEY'),
+      templateId: env('ACTIVATION_MSG91_OTP_TEMPLATE_ID'),
+      to,
+      code,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.message === 'activation_provider_not_configured') throw error;
+    throw new Error('activation_delivery_failed');
+  }
+}
 async function sendWhatsApp(to: string, code: string) {
   const token = env('ACTIVATION_META_ACCESS_TOKEN');
   const phoneNumberId = env('ACTIVATION_META_PHONE_NUMBER_ID');
@@ -169,7 +183,7 @@ Deno.serve(async (req) => {
 
     if (action === 'start') {
       const channel = String(body.channel || '');
-      if (channel !== 'email' && channel !== 'whatsapp') return json({ error: 'bad_channel' }, 400);
+      if (channel !== 'email' && channel !== 'whatsapp' && channel !== 'sms') return json({ error: 'bad_channel' }, 400);
       let destination = String(body.destination || '').trim();
       if (channel === 'email') {
         destination = destination.toLowerCase();
@@ -193,6 +207,7 @@ Deno.serve(async (req) => {
       if (insertError) throw new Error('activation_store_unavailable');
       try {
         if (channel === 'email') await sendEmail(destination, code);
+        else if (channel === 'sms') await sendSms(destination, code);
         else await sendWhatsApp(destination, code);
       } catch (error) {
         await admin.from('manager_activation_challenges').delete().eq('id', id).eq('user_id', user.id);

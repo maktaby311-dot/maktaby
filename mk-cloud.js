@@ -112,7 +112,7 @@
     if (!res.ok) {
       const key = data && data.error;
       const messages = {
-        activation_provider_not_configured: 'إعداد إرسال رمز التفعيل غير مكتمل على الخادم. لم يتم تفعيل الحساب؛ يلزم إعداد مزود البريد أو واتساب.',
+        activation_provider_not_configured: 'إعداد إرسال رمز التفعيل غير مكتمل على الخادم. لم يتم تفعيل الحساب؛ يلزم إعداد مزود البريد أو SMS أو واتساب.',
         activation_delivery_failed: 'تعذر إرسال رمز التفعيل. لم يتم تفعيل الحساب؛ حاول لاحقًا أو اختر وسيلة أخرى.',
         activation_rate_limited: 'تم طلب رموز كثيرة. انتظر قليلًا ثم أعد المحاولة.',
         invalid_or_expired_code: 'الرمز غير صحيح أو انتهت صلاحيته. اطلب رمزًا جديدًا.',
@@ -139,11 +139,11 @@
     setPendingActivation(username, contactEmail, contactPhone);
     let channel;
     if (contactEmail && contactPhone) {
-      const pick = window.prompt('اختر طريقة استلام رمز التفعيل واكتب رقمها:\n1 — البريد الإلكتروني\n2 — واتساب', '1');
+      const pick = window.prompt('اختر طريقة استلام رمز التفعيل واكتب رقمها:\n1 — البريد الإلكتروني\n2 — رسالة SMS\n3 — واتساب', '1');
       if (pick === null) throw uerr('تم إيقاف التفعيل. سجّل الدخول لاحقًا من هذا الجهاز لإعادة إرسال الرمز.');
-      if (pick !== '1' && pick !== '2') throw uerr('اكتب 1 للبريد أو 2 لواتساب.');
-      channel = pick === '2' ? 'whatsapp' : 'email';
-    } else channel = contactEmail ? 'email' : 'whatsapp';
+      if (!['1', '2', '3'].includes(pick)) throw uerr('اكتب 1 للبريد أو 2 للرسائل أو 3 لواتساب.');
+      channel = pick === '1' ? 'email' : pick === '2' ? 'sms' : 'whatsapp';
+    } else channel = contactEmail ? 'email' : 'sms';
     const destination = channel === 'email' ? contactEmail : contactPhone;
     const started = await activationApi({ action: 'start', channel, destination }, r.access_token);
     for (let attempt = 0; attempt < 5; attempt++) {
